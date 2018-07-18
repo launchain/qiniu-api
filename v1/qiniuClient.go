@@ -39,7 +39,7 @@ func UploadFileToQiniu(localFile, bucket, key, accessKey, secretKey string) (sto
 }
 
 // GetQiniuFileList Get file from Qiniu...
-func GetQiniuFileList(bucket, accessKey, secretKey string) ([]storage.ListItem, error) {
+func GetQiniuFileList(bucket, accessKey, secretKey, marker string, limit int) ([]storage.ListItem, string, error) {
 	qb := &qbox.Mac{
 		AccessKey: accessKey,
 		SecretKey: []byte(secretKey),
@@ -49,12 +49,12 @@ func GetQiniuFileList(bucket, accessKey, secretKey string) ([]storage.ListItem, 
 	cfg.UseHTTPS = false
 	cfg.UseCdnDomains = false
 	r := storage.NewBucketManager(qb, &cfg)
-	f, _, _, _, err := r.ListFiles(bucket, "", "", "", 1000)
+	f, _, marker, _, err := r.ListFiles(bucket, "", "", marker, limit)
 	if err != nil {
 		log.Fatalf("获取空间文件列表失败", err)
-		return f, err
+		return f, "", err
 	}
-	return f, nil
+	return f, marker, nil
 }
 
 // DeleteOneFileFromQiniu Delete file from Qiniu...
